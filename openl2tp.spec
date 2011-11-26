@@ -2,7 +2,7 @@
 Summary:	An L2TP client/server, designed for VPN use
 Name:		openl2tp
 Version:	1.8
-Release:	1
+Release:	2
 License:	GPL
 Group:		Networking/Daemons
 Source0:	http://dl.sourceforge.net//openl2tp/%{name}-%{version}.tar.gz
@@ -10,6 +10,7 @@ Source0:	http://dl.sourceforge.net//openl2tp/%{name}-%{version}.tar.gz
 Source1:	%{name}d.init
 Source2:	%{name}d.sysconfig
 Patch0:		%{name}-no_Werror.patch
+Patch1:		%{name}-setkey.patch
 URL:		http://www.openl2tp.org/
 BuildRequires:	bison
 BuildRequires:	flex
@@ -52,13 +53,14 @@ or applications that use the OpenL2TP APIs.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 %build
 %{__make} CFLAGS.optimize="%{rpmcflags}"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig}
+install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig,/var/run/%{name}}
 
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
@@ -87,6 +89,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(754,root,root) /etc/rc.d/init.d/openl2tpd
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/openl2tpd
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/openl2tpd.conf
+%dir /var/run/%{name}
 
 %files devel
 %defattr(644,root,root,755)
