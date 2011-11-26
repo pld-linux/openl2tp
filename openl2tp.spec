@@ -5,7 +5,7 @@ Version:	1.8
 Release:	1
 License:	GPL
 Group:		Networking/Daemons
-Source0:	ftp://downloads.sourceforge.net/projects/openl2tp/%{name}-%{version}.tar.gz
+Source0:	http://dl.sourceforge.net//openl2tp/%{name}-%{version}.tar.gz
 # Source0-md5:	e3d08dedfb9e6a9a1e24f6766f6dadd0
 Source1:	%{name}d.init
 Source2:	%{name}d.sysconfig
