@@ -9,6 +9,7 @@ Source0:	http://dl.sourceforge.net//openl2tp/%{name}-%{version}.tar.gz
 # Source0-md5:	e3d08dedfb9e6a9a1e24f6766f6dadd0
 Source1:	%{name}d.init
 Source2:	%{name}d.sysconfig
+Source3:	%{name}.tmpfiles
 Patch0:		%{name}-no_Werror.patch
 Patch1:		%{name}-setkey.patch
 URL:		http://www.openl2tp.org/
@@ -60,12 +61,15 @@ or applications that use the OpenL2TP APIs.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig,/var/run/%{name}}
+install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig,/var/run/%{name}} \
+	$RPM_BUILD_ROOT/usr/lib/tmpfiles.d
 
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/openl2tpd
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/openl2tpd
+install %{SOURCE3} $RPM_BUILD_ROOT/usr/lib/tmpfiles.d/%{name}.conf
+
 touch $RPM_BUILD_ROOT%{_sysconfdir}/openl2tpd.conf
 
 %clean
@@ -90,6 +94,7 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/openl2tpd
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/openl2tpd.conf
 %dir /var/run/%{name}
+/usr/lib/tmpfiles.d/%{name}.conf
 
 %files devel
 %defattr(644,root,root,755)
