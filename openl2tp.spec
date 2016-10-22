@@ -2,7 +2,7 @@
 Summary:	An L2TP client/server, designed for VPN use
 Name:		openl2tp
 Version:	1.8
-Release:	4
+Release:	5
 License:	GPL
 Group:		Networking/Daemons
 Source0:	http://dl.sourceforge.net//openl2tp/%{name}-%{version}.tar.gz
@@ -12,6 +12,7 @@ Source2:	%{name}d.sysconfig
 Source3:	%{name}.tmpfiles
 Patch0:		%{name}-no_Werror.patch
 Patch1:		%{name}-setkey.patch
+Patch2:		no-hardcoded-libdir.patch
 URL:		http://www.openl2tp.org/
 BuildRequires:	bison
 BuildRequires:	flex
@@ -55,16 +56,21 @@ or applications that use the OpenL2TP APIs.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
-%{__make} CFLAGS.optimize="%{rpmcflags}"
+%{__make} -j1 \
+	CFLAGS.optimize="%{rpmcflags}" \
+	SYS_LIBDIR=%{_libdir}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig,/var/run/%{name}} \
 	$RPM_BUILD_ROOT/usr/lib/tmpfiles.d
 
-%{__make} install DESTDIR=$RPM_BUILD_ROOT
+%{__make} install \
+	SYS_LIBDIR=%{_libdir} \
+	DESTDIR=$RPM_BUILD_ROOT
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/openl2tpd
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/openl2tpd
