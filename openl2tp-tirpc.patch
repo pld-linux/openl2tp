@@ -1,0 +1,38 @@
+--- openl2tp-1.8/l2tp_api.c.orig	2008-04-09 18:50:12.000000000 +0200
++++ openl2tp-1.8/l2tp_api.c	2020-08-31 21:05:56.928710570 +0200
+@@ -25,6 +25,7 @@
+ 
+ #include <rpc/pmap_clnt.h>
+ #include <net/ethernet.h>
++#include <netinet/in.h>
+ 
+ #include "usl.h"
+ 
+@@ -447,10 +448,12 @@
+ 	 * non-loopback interface, reject the request.
+ 	 */
+ 	if ((!l2tp_opt_remote_rpc) &&
+-	    ((xprt->xp_raddr.sin_addr.s_addr != htonl(INADDR_LOOPBACK)) &&
+-	     (xprt->xp_raddr.sin_addr.s_addr != htonl(INADDR_ANY)))) {
++	    memcmp(&xprt->xp_raddr.sin6_addr.s6_addr, &in6addr_loopback, 16) &&
++	    memcmp(&xprt->xp_raddr.sin6_addr.s6_addr, &in6addr_any, 16)) {
+ 		if (l2tp_opt_trace_flags & L2TP_DEBUG_API) {
+-			l2tp_log(LOG_ERR, "Rejecting RPC request from %s", inet_ntoa(xprt->xp_raddr.sin_addr));
++			char straddr[INET6_ADDRSTRLEN];
++			inet_ntop(AF_INET6, &xprt->xp_raddr.sin6_addr, straddr, sizeof(straddr));
++			l2tp_log(LOG_ERR, "Rejecting RPC request from %s", straddr);
+ 		}
+ 		svcerr_auth(xprt, AUTH_TOOWEAK);
+ 		return -EPERM;
+--- openl2tp-1.8/Makefile.orig	2020-08-31 21:06:29.711866302 +0200
++++ openl2tp-1.8/Makefile	2020-08-31 21:07:45.718121207 +0200
+@@ -135,7 +135,7 @@
+ 				-MMD -Wall -Wno-strict-aliasing \
+ 				$(CPPFLAGS) $(CPPFLAGS.dmalloc) \
+ 				-DSYS_LIBDIR=$(SYS_LIBDIR)
+-LDFLAGS.l2tpd=		-Wl,-E -L. -Lusl -lusl -ldl $(LIBS.dmalloc) -lc
+-LDFLAGS.l2tpconfig=	-Lcli -lcli -lreadline $(LIBS.dmalloc) $(READLINE_LDFLAGS) -lc
++LDFLAGS.l2tpd=		-Wl,-E -L. -Lusl -lusl -ltirpc -ldl $(LIBS.dmalloc) -lc
++LDFLAGS.l2tpconfig=	-Lcli -lcli -lreadline -ltirpc $(LIBS.dmalloc) $(READLINE_LDFLAGS) -lc
+ 
+ OPT_CFLAGS?=		-O
